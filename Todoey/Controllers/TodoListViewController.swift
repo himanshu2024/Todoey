@@ -10,14 +10,14 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    var itemArray = ["Find Milk","Bug Eggos","Destory Demogorgon"]
+    var itemArray = [Item(name : "Find Milk"),Item(name : "Bug Eggos"),Item(name : "Destory Demogorgon")]
     let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         if let list = defaults.array(forKey: "TodoListArray"){
-            itemArray = list as! [String]
+            itemArray = list as! [Item]
         }
     }
 
@@ -29,7 +29,9 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TodoItemCell", for: indexPath)
         
-        cell.textLabel?.text = itemArray[indexPath.row]
+        cell.textLabel?.text = itemArray[indexPath.row].name
+        
+        cell.accessoryType = itemArray[indexPath.row].checked ?  .checkmark : .none
         
         return cell 
     }
@@ -39,17 +41,10 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(indexPath.row)
         
-        if tableView.cellForRow(at: indexPath)?.accessoryType == UITableViewCell.AccessoryType.checkmark{
-        tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        }
-        else
-        {
-                    tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
-        
-
+        itemArray[indexPath.row].checked = !itemArray[indexPath.row].checked
         
         tableView.deselectRow(at: indexPath, animated: true)
+        tableView.reloadData()
     }
     
     //MARK - AddNewItem
@@ -62,7 +57,7 @@ class TodoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             print("Added")
             if let str = inputTextField!.text{
-                    self.itemArray.append(str)
+                    self.itemArray.append(Item(name : str))
                 self.defaults.set(self.itemArray, forKey: "TodoListArray")
                 self.tableView.reloadData()
             }
